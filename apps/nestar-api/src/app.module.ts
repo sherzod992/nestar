@@ -8,9 +8,9 @@ import { AppResolver } from './app.resolver';
 import { ComponentsModule } from './components/components.module';
 import { DatabaseModule } from './database/database.module';
 
-
+//decoretor 
 @Module({
-  imports: [
+  imports: [ // import property
     ConfigModule.forRoot({ isGlobal: true }), 
     GraphQLModule.forRoot({
       driver: ApolloDriver,
@@ -22,7 +22,7 @@ import { DatabaseModule } from './database/database.module';
     DatabaseModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AppResolver],
+  providers: [AppService, AppResolver],//property
 })
 export class AppModule {}
-
+//ingrident 
