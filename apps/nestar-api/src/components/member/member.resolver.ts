@@ -21,10 +21,10 @@ export class MemberResolver {
         console.log('Mutation: updateMember');
         return this.memberService.updateMember();
     }
-    @Mutation(()=>String)
+
+    @Query(()=>String)
     public async getMember():Promise<string>{
-        console.log('Mutation: getMember');
+        console.log('Query: getMember');
         return this.memberService.getMember();
     }
-
 }
