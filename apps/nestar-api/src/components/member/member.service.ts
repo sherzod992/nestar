@@ -1,8 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Member } from '../../libs/dto/member/member';
-import { MemberInput } from '../../libs/dto/member/member.input';
+import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
+import { MemberStatus } from '../../libs/enums/member.enum';
+import { Message } from '../../libs/enums/common.enum';
 @Injectable()
 export class MemberService {
 
@@ -15,14 +17,30 @@ export class MemberService {
             // auth hosil qilamiz
             return result;
         }catch(err){
-            console.log("Error, Service Model",err);
+            console.log("Error, Signup Model",err);
             throw new BadRequestException(err)
         }
 
     }
-    public async login(): Promise<string> {
-        return 'login executed';
-    }
+    public async login(input: LoginInput): Promise<Member> {
+        try {
+          const response = await this.memberModel
+            .findOne({ memberNick: input.memberNick })
+            .select('+memberPassword')
+            .exec();
+      
+          if (!response || response.memberStatus === MemberStatus.DELATE) {
+            throw new InternalServerErrorException(Message.NO_MEMBER_NICK);
+          } else if (response.memberStatus === MemberStatus.BLOCK) {
+            throw new InternalServerErrorException(Message.NO_MEMBER_NICK);
+          }
+      
+          return response; 
+        } catch (err) {
+          console.log("Error, Login Model", err);
+          throw new BadRequestException(err);
+        }
+      }
     public async updateMember(): Promise<string> {
         return 'updateMember executed';
     }
