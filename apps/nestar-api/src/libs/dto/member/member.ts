@@ -31,7 +31,7 @@ export class Member{
     @Field(()=>String,{nullable:true})
     memberImage:string;
     @Field(()=>String,{nullable:true})
-    memberAdress:string;
+    memberAdress?:string;
 
     @Field(()=>String,{nullable:true})
     memberDesc?:string;
