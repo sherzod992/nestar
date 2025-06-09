@@ -9,8 +9,10 @@ import { Member } from '../../libs/dto/member/member';
 
 @Resolver()
 export class MemberResolver {
-    constructor(private readonly memberService:MemberService){}
 
+    //DI 
+    constructor(private readonly memberService:MemberService){}
+    
     @Mutation(()=>Member)
     @UsePipes(ValidationPipe)
     public async signup(@Args('input')input:MemberInput):Promise<Member>{
