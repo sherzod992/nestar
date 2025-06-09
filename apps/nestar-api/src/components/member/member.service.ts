@@ -17,8 +17,8 @@ export class MemberService {
             // auth hosil qilamiz
             return result;
         }catch(err){
-            console.log("Error, Signup Model",err);
-            throw new BadRequestException(err)
+            console.log("Error, Signup Model",err.message);
+            throw new BadRequestException(Message.USED_MEMBER_NICK_OR_PHONE)
         }
 
     }
