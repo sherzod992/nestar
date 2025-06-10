@@ -29,11 +29,11 @@ import { T } from './libs/types/common';
       return graphQLFormattedError
       }
     }),
-    ComponentsModule,
-    DatabaseModule,
+    ComponentsModule,//http
+    DatabaseModule, //tcp
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver],//property
 })
 export class AppModule {}
-//ingrident 
+//ingrident *-
