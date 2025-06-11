@@ -1,11 +1,14 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { MemberService } from './member.service';
-import { LoginInput, MemberInput } from '../../libs/dto/member/member.input';
+import { LoginInput, MemberInput} from '../../libs/dto/member/member.input';
 import { Member } from '../../libs/dto/member/member';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
 import { ObjectId } from 'mongoose';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { MemberType } from '../../libs/enums/member.enum';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 
 
@@ -45,9 +48,40 @@ export class MemberResolver {
 		console.log('memberNick:', memberNick);
 		return `Hi  ${memberNick}`;
 	}
+
+    @Roles(MemberType.USER, MemberType.AGENT)
+	@UseGuards(AuthGuard)
+	@Query(() => String)
+	public async checkAuthRoles(@AuthMember() authMember: Member): Promise<string> {
+		console.log('Query: checkAuthRoles');
+		return `Hi  ${authMember.memberNick}, you are ${authMember.memberType} (memberId: ${authMember._id})`;
+	}
+    
+	@UseGuards(AuthGuard)
+	@Query(() => String)
+	public async checkAuthAdmin(@AuthMember('memberNick') memberNick: string): Promise<string> {
+		console.log('Query: checkAuth');
+		console.log('memberNick:', memberNick);
+		return `Hi  ${memberNick}`;
+	}
     @Query(()=>String)
     public async getMember():Promise<string>{
         console.log('Query: getMember');
         return this.memberService.getMember();
     }
+    	// ADMIN MANAGEMENT:Admin//
+	@Roles(MemberType.ADMIN)
+	@UseGuards(RolesGuard)
+
+	public async getAllMembersByAdmin(): Promise<string> {
+		console.log('Query: getAllMembersByAdmin');
+		return this.memberService.getAllMemberByAdmin();
+	}
+
+	@Roles(MemberType.ADMIN)
+	@UseGuards(RolesGuard)
+	@Mutation(() => Member)
+	public async updateMemberByAdmin(): Promise<string> {
+		return await this.memberService.updateMemberByAdmin();
+	}
 }

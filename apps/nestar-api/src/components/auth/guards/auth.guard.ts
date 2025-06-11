@@ -4,27 +4,28 @@ import { Message } from 'apps/nestar-api/src/libs/enums/common.enum';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-	constructor(private authService: AuthService) {}
+    constructor(private authService: AuthService) {}
 
-	async canActivate(context: ExecutionContext | any): Promise<boolean> {
-		console.info('--- @guard() Authentication [AuthGuard] ---');
+    async canActivate(context: ExecutionContext | any): Promise<boolean> {
+        console.info('--- @guard() Authentication [AuthGuard] ---');
 
-		if (context.contextType === 'graphql') {
-			const request = context.getArgByIndex(2).req;
+        if (context.contextType === 'graphql') {
+            const request = context.getArgByIndex(2).req;
 
-			const bearerToken = request.headers.authorization;
-			if (!bearerToken) throw new BadRequestException(Message.TOKEN_NOT_EXIST);
+            const bearerToken = request.headers.authorization;
+            if (!bearerToken) throw new BadRequestException(Message.TOKEN_NOT_EXIST);
 
-			const token = bearerToken.split(' ')[1],
-				authMember = await this.authService.verifyToken(token);
-			if (!authMember) throw new UnauthorizedException(Message.NOT_AUTHENTICATED);
+            const token = bearerToken.split(' ')[1];
+            const authMember = await this.authService.verifyToken(token);
+            if (!authMember) throw new UnauthorizedException(Message.NOT_AUTHENTICATED);
 
-			console.log('memberNick[auth] =>', authMember.memberNick);
-			request.body.authMember = authMember;
+            console.log('memberNick[auth] =>', authMember.memberNick);
 
-			return true;
-		}
+            // 인증 성공 시 true 반환
+            return true;
+        }
 
-		// description => http, rpc, gprs and etc are ignored
-	}
+        // GraphQL이 아닌 경우 기본적으로 false 반환
+        return false;
+    }
 }
