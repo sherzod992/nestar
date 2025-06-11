@@ -55,6 +55,9 @@ export class Member{
     @Field(()=>Int)
     memberRank:number;
 
+    @Field(() => Int)
+	memberViews: number;
+    
     @Field(()=>Int)
     memberWarnings:number
 

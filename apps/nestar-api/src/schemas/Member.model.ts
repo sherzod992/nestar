@@ -79,6 +79,10 @@ const MemberSchema = new Schema({
     deletedAt:{
         type:Date,
     },
+    memberViews: {
+        type: Number,
+        default: 0,
+      },
 
 
     },
