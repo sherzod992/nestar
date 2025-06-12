@@ -1,6 +1,6 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { MemberService } from './member.service';
-import { LoginInput, MemberInput} from '../../libs/dto/member/member.input';
+import { AgentsInquiry, LoginInput, MemberInput, MembersInquiry} from '../../libs/dto/member/member.input';
 import { Member } from '../../libs/dto/member/member';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { UseGuards } from '@nestjs/common';
@@ -81,14 +81,24 @@ export class MemberResolver {
 		const targetId = shapeIntoMongoObjectId(input);
 		return await this.memberService.getMember(memberId, targetId);
 	}
+	@UseGuards(WithoutGuard)
+	@Query(() => Member)
+	public async getAgents(@Args('input') input: AgentsInquiry, @AuthMember('_id') memberId: ObjectId): Promise<Member> {
+		console.log('Query: getAgents');
+		return await this.memberService.getAgents(memberId, input);
+  }
     	// ADMIN MANAGEMENT:Admin//
 	@Roles(MemberType.ADMIN)
 	@UseGuards(RolesGuard)
 
-	public async getAllMembersByAdmin(): Promise<string> {
+	public async getAllMembersByAdmin(@Args('input') input: MembersInquiry): Promise<Member> {
 		console.log('Query: getAllMembersByAdmin');
-		return this.memberService.getAllMemberByAdmin();
+		return await this.memberService.getAllMembersByAdmin(input);
 	}
+
+	@Roles(MemberType.ADMIN)
+	@UseGuards(RolesGuard)
+	@Mutation(() => Member)
 
 	@Roles(MemberType.ADMIN)
 	@UseGuards(RolesGuard)
