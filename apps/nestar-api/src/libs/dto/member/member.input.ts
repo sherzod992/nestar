@@ -61,7 +61,7 @@ export class AgentsInquiry {
   limit: number;
 
   @IsOptional()
-  @IsIn(availableAgentSorts) // [] emas, to‘g‘ridan-to‘g‘ri array
+  @IsIn(availableAgentSorts) 
   @Field(() => String, { nullable: true })
   sort?: string;
 

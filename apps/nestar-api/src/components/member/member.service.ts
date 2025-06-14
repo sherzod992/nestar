@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
-import { Member } from '../../libs/dto/member/member';
+import { Member, Members } from '../../libs/dto/member/member';
 import { AgentsInquiry, LoginInput, MemberInput, MembersInquiry } from '../../libs/dto/member/member.input';
 import { MemberStatus, MemberType } from '../../libs/enums/member.enum';
 import { Direction, Message } from '../../libs/enums/common.enum';
@@ -52,25 +52,22 @@ export class MemberService {
           throw new BadRequestException(err);
         }
       }
-      public async updateMember(memberId: ObjectId, input: MemberUpdate): Promise<Member> {
-        const result = await this.memberModel
-            .findOneAndUpdate(
-                { _id: memberId, memberStatus: MemberStatus.ACTIVE },
-                input,
-                { new: true }
-            )
-            .exec();
-    
-        if (!result) {
-            throw new InternalServerErrorException(Message.UPDATE_FAILED);
-        }
-    
-        // 타입 단언을 사용하여 `result`를 `Member`로 변환
-        const updatedMember = result as Member;
-    
-        updatedMember.accessToken = await this.authService.createToken(updatedMember);
-        return updatedMember;
+    public async updateMember(memberId: ObjectId, input: MemberUpdate): Promise<Member> {
+    const result = await this.memberModel
+        .findByIdAndUpdate(
+            { _id: memberId, memberStatus: MemberStatus.ACTIVE },
+            input,
+            { new: true }
+        )
+        .exec();
+
+    if (!result) {
+        throw new InternalServerErrorException(Message.UPDATE_FAILED);
     }
+
+    result.accessToken = await this.authService.createToken(result);
+    return result;
+}
     public async getMember(memberId: ObjectId, targetId: ObjectId): Promise<Member> {
       const search: T = {
         _id: targetId,
@@ -92,7 +89,7 @@ export class MemberService {
       }
       return targetMember;
     }
-    public async getAgents(memberId: ObjectId, input: AgentsInquiry): Promise<Member> {
+    public async getAgents(memberId: ObjectId, input: AgentsInquiry): Promise<Members> {
       const { text } = input.search;
       const match: T = { memberType: MemberType.AGENT, memberStatus: MemberStatus.ACTIVE };
       const sort: T = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
@@ -115,7 +112,7 @@ export class MemberService {
       if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
       return result[0];
     }
-    public async getAllMembersByAdmin(input: MembersInquiry): Promise<Member> {
+    public async getAllMembersByAdmin(input: MembersInquiry): Promise<Members> {
       const { memberStatus, memberType, text } = input.search;
       const match: T = {};
       const sort: T = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
@@ -141,7 +138,16 @@ export class MemberService {
       if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
       return result[0];
     }
-    public async updateMemberByAdmin():Promise<string>{
-      return 'update admin executed';
-    }
+    public async updateMemberByAdmin(input: MemberUpdate): Promise<Member> {
+      const result = await this.memberModel
+          .findByIdAndUpdate({ _id: input._id }, input, { new: true })
+          .exec();
+  
+      if (!result) {
+          throw new InternalServerErrorException(Message.UPDATE_FAILED);
+      }
+  
+      return result;
+  }
+    
 }
