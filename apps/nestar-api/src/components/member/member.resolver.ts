@@ -115,69 +115,47 @@ export class MemberResolver {
 	// IMAGE UPLOAD API //
 
 	@UseGuards(AuthGuard)
-	@Mutation((returns) => String)
-	public async imageUploader(
-		@Args({ name: 'file', type: () => GraphQLUpload })
-		{ createReadStream, filename, mimetype }: FileUpload,
-		@Args('target') target: String,
-	): Promise<string> {
-		console.log('Mutation: imageUploader');
+	@Mutation(() => [String])
+public async imagesUploader(
+  @Args('files', { type: () => [GraphQLUpload] }) files: Promise<FileUpload>[],
+  @Args('target') target: string,
+): Promise<string[]> {
+  console.log('Mutation: imagesUploader');
 
-		if (!filename) throw new Error(Message.UPLOAD_FAILED);
-		const validMime = validMimeTypes.includes(mimetype);
-		if (!validMime) throw new Error(Message.PROVIDE_ALLOWED_FORMAT);
+  const uploadedImages = new Array(files.length).fill(null);  // boshida hammasi null
 
-		const imageName = getSerialForImage(filename);
-		const url = `uploads/${target}/${imageName}`;
-		const stream = createReadStream();
+  const promisedList = files.map(async (img, index) => {
+    try {
+      const { filename, mimetype, createReadStream } = await img;
 
-		const result = await new Promise((resolve, reject) => {
-			stream
-				.pipe(createWriteStream(url))
-				.on('finish', async () => resolve(true))
-				.on('error', () => reject(false));
-		});
-		if (!result) throw new Error(Message.UPLOAD_FAILED);
+      if (!validMimeTypes.includes(mimetype)) throw new Error(Message.PROVIDE_ALLOWED_FORMAT);
 
-		return url;
-	}
+      const imageName = getSerialForImage(filename);
+      const url = `uploads/${target}/${imageName}`;
+      const stream = createReadStream();
 
-	@UseGuards(AuthGuard)
-	@Mutation((returns) => [String])
-	public async imagesUploader(
-		@Args('files', { type: () => [GraphQLUpload] })
-		files: Promise<FileUpload>[],
-		@Args('target') target: String,
-	): Promise<string[]> {
-		console.log('Mutation: imagesUploader');
+      const result = await new Promise((resolve, reject) => {
+        stream
+          .pipe(createWriteStream(url))
+          .on('finish', () => resolve(true))
+          .on('error', () => reject(false));
+      });
 
-		const uploadedImages: string[] = [];
-		const promisedList = files.map(async (img: Promise<FileUpload>, index: number): Promise<Promise<void>> => {
-			try {
-				const { filename, mimetype, encoding, createReadStream } = await img;
+      if (!result) throw new Error(Message.UPLOAD_FAILED);
 
-				const validMime = validMimeTypes.includes(mimetype);
-				if (!validMime) throw new Error(Message.PROVIDE_ALLOWED_FORMAT);
+      uploadedImages[index] = url;
+    } catch (err) {
+      console.error('Error uploading file:', err.message || err);
+      // Agar xato bo‘lsa, null qoldiramiz, keyinchalik filtr qilamiz
+      uploadedImages[index] = null;
+    }
+  });
 
-				const imageName = getSerialForImage(filename);
-				const url = `uploads/${target}/${imageName}`;
-				const stream = createReadStream();
+  await Promise.all(promisedList);
 
-				const result = await new Promise((resolve, reject) => {
-					stream
-						.pipe(createWriteStream(url))
-						.on('finish', () => resolve(true))
-						.on('error', () => reject(false));
-				});
-				if (!result) throw new Error(Message.UPLOAD_FAILED);
+  // null bo‘lmagan faqat to‘g‘ri yuklangan fayllar URL larini qaytarish
+  return uploadedImages.filter((url): url is string => url !== null);
+}
 
-				uploadedImages[index] = url;
-			} catch (err) {
-				console.log('Error, file missing!');
-			}
-		});
-
-		await Promise.all(promisedList);
-		return uploadedImages;
-	}
+	
 }
