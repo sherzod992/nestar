@@ -8,21 +8,19 @@ import { Message } from '../../libs/enums/common.enum';
 
 @Injectable()
 export class PropertyService {
-    constructor(
-        @InjectModel('Property') private readonly propertyModel: Model<Property>,
-        private readonly memberService: MemberService 
-    ) {}
-    public async createProperty(input: PropertyInput): Promise<Property> {
-		try {
-			const result = await this.propertyModel.create(input);
-			await this.memberService.memberStatsEditor({
-                 _id: result.memberId, targetKey: 'memberProperties', modifier: 1 
-                });
+  constructor(
+    @InjectModel('Property') private readonly propertyModel: Model<Property>,
+    private readonly memberService: MemberService,
+  ) {}
+  public async createProperty(input: PropertyInput): Promise<Property> {
+    try {  
+        const result = await this.propertyModel.create(input);
+        await this.memberService.memberStatsEditor({ _id: result.memberId, targetKey: 'memberProperties', modifier: 1 });
 
-			return result;
-		} catch (err) {
-			console.log('Error, Service.model:', err.message);
-			throw new BadRequestException(Message.USED_MEMBER_NICK_OR_PHONE);
-		}
-	}
+        return result;
+    } catch (err) {
+        console.log('Error, Service.model:', err.message);
+        throw new BadRequestException(Message.USED_MEMBER_NICK_OR_PHONE);
+        }
+    }
 }
