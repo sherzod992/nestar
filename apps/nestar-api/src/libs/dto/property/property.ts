@@ -4,7 +4,6 @@ import { PropertyLocation, PropertyStatus, PropertyType } from "../../enums/prop
 import { Member, TotalCounter } from "../member/member";
 
 
-
 @ObjectType()
 export class Property {
   @Field(() => String)
