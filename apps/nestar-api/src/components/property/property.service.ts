@@ -100,34 +100,40 @@ export class PropertyService {
       return result;
     }
     public async getProperties(memberId: ObjectId, input: PropertiesInquiry): Promise<Properties> {
+      // 🔍 Faqat ACTIVE mulklarni olish uchun boshlang'ich filter
       const match: T = { propertyStatus: PropertyStatus.ACTIVE };
+    
+      // ↕️ Sort parametri: input.sort bo'lmasa 'createdAt' bo'yicha, DESC tartibda
       const sort: T = { [input?.sort ?? 'createdAt']: input?.direction ?? Direction.DESC };
-  
+    
+      // 🎯 Qo'shimcha filterlar input asosida match'ga qo'shiladi
       this.shapeMatchQuery(match, input);
-      console.log('match:', match);
-  
-      const result = await this.propertyModel
-        .aggregate([
-          { $match: match },
-          { $sort: sort },
-          {
-            $facet: {
-              list: [
-                { $skip: (input.page - 1) * input.limit },
-                { $limit: input.limit },
-                lookupMember,
-                { $unwind: '$memberData' },
-              ],
-  
-              metaCounter: [{ $count: 'total' }],
-            },
+    
+      // 🧱 Aggregation pipeline
+      const result = await this.propertyModel.aggregate([
+        { $match: match },                 // Filter qo'llaniladi
+        { $sort: sort },                   // Sort qo'llaniladi
+    
+        {
+          $facet: {
+            list: [
+              { $skip: (input.page - 1) * input.limit }, // ⏭️ Sahifalash (page)
+              { $limit: input.limit },                   // 🔢 Limit (nechta)
+              lookupMember,                              // 👤 Member ma’lumotlarini qo‘shish
+              { $unwind: '$memberData' },                // 🔓 Array emas, bitta object qilish
+            ],
+            metaCounter: [{ $count: 'total' }],          // 🧮 Umumiy sonni hisoblash
           },
-        ])
-        .exec();
-  
+        },
+      ]).exec();
+    
+      // 🚨 Agar natija bo'lmasa, xatolik
       if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+    
+      // ✅ Birinchi va yagona aggregation natijasini qaytarish
       return result[0];
     }
+    
 
     private shapeMatchQuery(match: T, input: PropertiesInquiry): void {
       const {
