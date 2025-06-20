@@ -68,7 +68,7 @@ export class MemberService {
     result.accessToken = await this.authService.createToken(result);
     return result;
 }
-    public async getMember(memberId: ObjectId | null, targetId: ObjectId): Promise<Member> {
+  public async getMember(memberId: ObjectId | null, targetId: ObjectId): Promise<Member | null> {
       const search: T = {
         _id: targetId,
         memberStatus: {
@@ -89,6 +89,7 @@ export class MemberService {
       }
       return targetMember;
     }
+    
     public async getAgents(memberId: ObjectId, input: AgentsInquiry): Promise<Members> {
       const { text } = input.search;
       const match: T = { memberType: MemberType.AGENT, memberStatus: MemberStatus.ACTIVE };

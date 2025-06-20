@@ -49,7 +49,6 @@ export class PropertyService {
           targetProperty.propertyViews++;
         }
       }
-      targetProperty.memberData = await this.memberService.getMember(null, targetProperty.memberId);
       return targetProperty;
     }
     
@@ -268,6 +267,8 @@ export class PropertyService {
   
       return result;
     }
+    
+    
     public async removePropertyByAdmin(propertyId: ObjectId): Promise<Property> {
       const search: T = { _id: propertyId, propertyStatus: PropertyStatus.DELETE };
       const result = await this.propertyModel.findOneAndDelete(search).exec();

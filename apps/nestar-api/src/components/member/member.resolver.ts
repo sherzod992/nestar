@@ -3,7 +3,7 @@ import { MemberService } from './member.service';
 import { AgentsInquiry, LoginInput, MemberInput, MembersInquiry} from '../../libs/dto/member/member.input';
 import { Member, Members } from '../../libs/dto/member/member';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { UseGuards } from '@nestjs/common';
+import { InternalServerErrorException, UseGuards } from '@nestjs/common';
 import { AuthMember } from '../auth/decorators/authMember.decorator';
 import { ObjectId } from 'mongoose';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -80,10 +80,17 @@ export class MemberResolver {
 	@UseGuards(WithoutGuard)
 	@Query(() => Member)
 	public async getMember(@Args('memberId') input: string, @AuthMember('_id') memberId: ObjectId): Promise<Member> {
-		console.log('Query: getMember');
-		console.log('memberId:', memberId);
-		const targetId = shapeIntoMongoObjectId(input);
-		return await this.memberService.getMember(memberId, targetId);
+	  console.log('Query: getMember');
+	  console.log('memberId:', memberId);
+	  const targetId = shapeIntoMongoObjectId(input);
+	
+	  const member = await this.memberService.getMember(memberId, targetId);
+	
+	  if (!member) {
+		throw new InternalServerErrorException('Member not found');
+	  }
+	
+	  return member;
 	}
 	@UseGuards(WithoutGuard)
 	@Query(() => Members)
