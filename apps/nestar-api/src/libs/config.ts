@@ -71,4 +71,12 @@ export const lookupAuthMemberLiked = (memberId: T, targetRefId: string = '$_id')
 			as: 'meLiked',
 		},
 	};
+}; 
+export const lookupFavorite = {
+	$lookup: {
+		from: 'members',
+		localField: 'favoriteProperty.memberId',
+		foreignField: '_id',
+		as: 'favoriteProperty.memberData',
+	}, 
 };

@@ -20,12 +20,13 @@ import { BoardArticleUpdate } from '../../libs/dto/board-article/board-article.u
 export class BoardArticleResolver {
     constructor(private readonly boardArticleService: BoardArticleService) {}
 
-
+	//faqat Login bolganlar foydalanadi
     @UseGuards(AuthGuard)
+	// GraphQL mutation tipidagi endpoint. Yangi BoardArticle yaratadi.
 	@Mutation(() => BoardArticle)
 	public async createBoardArticle(
-		@Args('input') input: BoardArticleInput,
-		@AuthMember('_id') memberId: ObjectId,
+		@Args('input') input: BoardArticleInput, //foydalanuvchida kiritadigon argument
+		@AuthMember('_id') memberId: ObjectId,// user id olinyapti
 	): Promise<BoardArticle> {
 		console.log('Mutation: createBoardArticle');
 		return await this.boardArticleService.createBoardArticle(memberId, input);

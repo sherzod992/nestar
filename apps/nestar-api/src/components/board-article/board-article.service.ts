@@ -22,11 +22,11 @@ export class BoardArticleService {
 		// private readonly likeService: LikeService,
 	) {}
     public async createBoardArticle(memberId: ObjectId, input: BoardArticleInput): Promise<BoardArticle> {
-		input.memberId = memberId;
+		input.memberId = memberId;//Kiruvchi inputga login bo‘lgan userning
 
 		try {
-			const result = await this.boardArticleModel.create(input);
-			await this.memberService.memberStatsEditor({
+			const result = await this.boardArticleModel.create(input);//MongoDB orqali yangi article hujjatini yaratadi.
+			await this.memberService.memberStatsEditor({//Article yaratgan memberning statistikasi (memberArticles soni) 1 taga oshiriladi.
 				_id: memberId,
 				targetKey: 'memberArticles',
 				modifier: 1,
