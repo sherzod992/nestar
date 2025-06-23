@@ -13,6 +13,9 @@ import * as moment from 'moment';
 import { PropertyUpdate } from '../../libs/dto/property/property.update';
 import { lookupMember, shapeIntoMongoObjectId } from '../../libs/config';
 import { PropertyStatus } from '../../libs/enums/property.enum';
+import { LikeInput } from '../../libs/dto/like/like.input';
+import { LikeGroup } from '../../libs/enums/like.enum';
+import { LikeService } from '../like/like.service';
 @Injectable()
 export class PropertyService {
 
@@ -20,6 +23,7 @@ export class PropertyService {
 		@InjectModel('Property') private readonly propertyModel: Model<Property>,
 		private memberService: MemberService,
 		private viewService: ViewService,
+    private likeService: LikeService,
 	) {}
   public async createProperty(input: PropertyInput): Promise<Property> {
     try {  
@@ -38,7 +42,7 @@ export class PropertyService {
         propertyStatus: PropertyStatus.ACTIVE,
       };
   
-      const targetProperty: Property | null = await this.propertyModel.findOne(search).lean().exec();
+      const targetProperty: Property | null = await this.propertyModel.findOne(search).lean().exec() as Property
       if (!targetProperty) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
   
       if (memberId) {
@@ -48,6 +52,8 @@ export class PropertyService {
           await this.propertyStatsEditor({ _id: propertyId, targetKey: 'propertyViews', modifier: 1 });
           targetProperty.propertyViews++;
         }
+        const likeInput = { memberId: memberId, likeRefId: propertyId, likeGroup: LikeGroup.PROPERTY };
+        targetProperty.meLiked = await this.likeService.checkLikeExistence(likeInput);
       }
       return targetProperty;
     }
@@ -267,7 +273,30 @@ export class PropertyService {
   
       return result;
     }
+
+
+    public async likeTargetProperty(memberId: ObjectId, likeRefId: ObjectId): Promise<Property> {
+      const target = await this.propertyModel.findOne({ _id: likeRefId, propertyStatus: PropertyStatus.ACTIVE }).exec();
     
+      if (!target) {
+        throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+      }
+    
+      const input: LikeInput = {
+        memberId: memberId,
+        likeRefId: likeRefId,
+        likeGroup: LikeGroup.PROPERTY,
+      };
+    
+      const modifier: number = await this.likeService.toggleLike(input);
+      const result = await this.propertyStatsEditor({ _id: likeRefId, targetKey: 'propertyLikes', modifier: modifier });
+    
+      if (!result) {
+        throw new InternalServerErrorException(Message.SOMETHING_WENT_WRONG);
+      }
+    
+      return result;
+    }
     
     public async removePropertyByAdmin(propertyId: ObjectId): Promise<Property> {
       const search: T = { _id: propertyId, propertyStatus: PropertyStatus.DELETE };

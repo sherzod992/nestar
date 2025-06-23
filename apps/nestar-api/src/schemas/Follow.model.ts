@@ -18,3 +18,4 @@ const FollowSchema = new Schema(
 FollowSchema.index({ followingId: 1, followerId: 1 }, { unique: true });
 
 export default FollowSchema;
+

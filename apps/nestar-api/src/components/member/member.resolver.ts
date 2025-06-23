@@ -65,6 +65,23 @@ export class MemberResolver {
 		console.log('Query: checkAuthRoles');
 		return `Hi  ${authMember.memberNick}, you are ${authMember.memberType} (memberId: ${authMember._id})`;
 	}
+
+	@UseGuards(AuthGuard)
+	@Mutation(() => Member)// UnAuntihanticated members // royhatdan otmagan azolarni ham like bosadi
+	public async likeTargetMember(@Args("memberId") input: string, @AuthMember('_id') memberId: ObjectId,): Promise<Member>{
+	  console.log('Mutation: likeTargetMember');
+	  const likeRefId = shapeIntoMongoObjectId(input);
+	  return await this.memberService.likeTargetMember(memberId, likeRefId);
+	  }
+
+
+
+
+
+
+
+
+
 // Faqat login bo‘lgan foydalanuvchi uchun ishlaydi (@UseGuards(AuthGuard)).
 
 // @AuthMember('memberNick') orqali faqat memberNick ni oladi.
