@@ -66,26 +66,20 @@ export class MemberResolver {
 		return `Hi  ${authMember.memberNick}, you are ${authMember.memberType} (memberId: ${authMember._id})`;
 	}
 
-	@UseGuards(AuthGuard)
+
+	@UseGuards(AuthGuard) // Faqat login bo‘lgan foydalanuvchi uchun ishlaydi (@UseGuards(AuthGuard)).
 	@Mutation(() => Member)// UnAuntihanticated members // royhatdan otmagan azolarni ham like bosadi
+	//likeTargetMember mutation graph QL ApI
+	//
 	public async likeTargetMember(@Args("memberId") input: string, @AuthMember('_id') memberId: ObjectId,): Promise<Member>{
 	  console.log('Mutation: likeTargetMember');
-	  const likeRefId = shapeIntoMongoObjectId(input);
+	  const likeRefId = shapeIntoMongoObjectId(input); //stringni MongoDB ObjectId ga aylantirish
 	  return await this.memberService.likeTargetMember(memberId, likeRefId);
-	  }
-
-
-
-
-
-
-
+	}
 
 
 // Faqat login bo‘lgan foydalanuvchi uchun ishlaydi (@UseGuards(AuthGuard)).
-
 // @AuthMember('memberNick') orqali faqat memberNick ni oladi.
-
 // Foydalanuvchiga salom qaytaradi.
 	@UseGuards(AuthGuard)
 	@Query(() => String)

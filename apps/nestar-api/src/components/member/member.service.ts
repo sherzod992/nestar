@@ -14,6 +14,7 @@ import { LikeGroup } from '../../libs/enums/like.enum';
 import { LikeInput } from '../../libs/dto/like/like.input';
 import { Follower, Following,MeFollowed} from "../../libs/dto/follow/follow";
 import { LikeService } from '../like/like.service';
+import { lookupAuthMemberLiked } from '../../libs/config';
 @Injectable()
 export class MemberService {
     
@@ -106,17 +107,17 @@ public async getMember(memberId: ObjectId | null, targetId: ObjectId): Promise<M
 }
     public async likeTargetMember(memberId: ObjectId, likeRefId: ObjectId): Promise<Member> {
       const target = await this.memberModel.findOne({ _id: likeRefId, memberStatus: MemberStatus.ACTIVE }).exec();
-    
+    // birinchi izlab topamiz 
       if (!target) {
         throw new InternalServerErrorException(Message.NO_DATA_FOUND);
       }
     
       const input: LikeInput = {
-        memberId: memberId,
+        memberId: memberId,// 
         likeRefId: likeRefId,
         likeGroup: LikeGroup.MEMBER,
       }; 
-    
+    // likelarni toggle qilish uchun -1 +1
       const modifier: number = await this.likeService.toggleLike(input);
       const result = await this.memberStatsEditor({ _id: likeRefId, targetKey: 'memberLikes', modifier: modifier });
     
@@ -140,12 +141,18 @@ public async getMember(memberId: ObjectId | null, targetId: ObjectId): Promise<M
           { $sort: sort },
           {
             $facet: {
-              list: [{ $skip: (input.page - 1) * input.limit },{ $limit: input.limit }],
+              list: [{ $skip: (input.page - 1) * input.limit },
+                { $limit: input.limit },
+                //meliked
+                lookupAuthMemberLiked(memberId),
+              ],
+             
               metaCounter: [{ $count: 'total' }],
             },
           },
         ])
         .exec();
+      console.log('result:', result);
       if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
       return result[0];
     }
@@ -165,7 +172,9 @@ public async getMember(memberId: ObjectId | null, targetId: ObjectId): Promise<M
           { $sort: sort },
           {
             $facet: {
-              list: [{ $skip: (input.page - 1) * input.limit }, { $limit: input.limit }],
+              list: [{ $skip: (input.page - 1) * input.limit }, { $limit: input.limit },
+                
+              ],
               metaCounter: [{ $count: 'total' }],
             },
           },

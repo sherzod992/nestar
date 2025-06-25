@@ -2,6 +2,8 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { LikeGroup } from '../../enums/like.enum';
 import { ObjectId } from 'mongoose';
 
+
+//mulojatchim like bosgan bosmagan
 @ObjectType()
 export class MeLiked {
 	@Field(() => String)
@@ -14,6 +16,8 @@ export class MeLiked {
 	myFavorite: boolean;
 }
 
+
+//likelar hosil bolishi qaysi holatdaligini bildiradi
 @ObjectType()
 export class Like {
 	@Field(() => String)
