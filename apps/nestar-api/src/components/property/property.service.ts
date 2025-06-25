@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId, Schema } from 'mongoose';
 import { Properties, Property } from '../../libs/dto/property/property';
 import { MemberService } from '../member/member.service';
-import { AgentPropertiesInquiry, AllPropertiesInquiry, PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
+import { AgentPropertiesInquiry, AllPropertiesInquiry, OrdinaryInquiry, PropertiesInquiry, PropertyInput } from '../../libs/dto/property/property.input';
 import { Direction, Message } from '../../libs/enums/common.enum';
 import { ViewService } from '../view/view.service';
 import { StatisticModifier, T } from '../../libs/types/common';
@@ -273,8 +273,6 @@ export class PropertyService {
   
       return result;
     }
-
-
     public async likeTargetProperty(memberId: ObjectId, likeRefId: ObjectId): Promise<Property> {
       const target = await this.propertyModel.findOne({ _id: likeRefId, propertyStatus: PropertyStatus.ACTIVE }).exec();
     
@@ -296,8 +294,7 @@ export class PropertyService {
       }
     
       return result;
-    }
-    
+    } 
     public async removePropertyByAdmin(propertyId: ObjectId): Promise<Property> {
       const search: T = { _id: propertyId, propertyStatus: PropertyStatus.DELETE };
       const result = await this.propertyModel.findOneAndDelete(search).exec();
@@ -307,5 +304,11 @@ export class PropertyService {
       }
   
       return result;
+    }
+    public async getFavorites(memberId: ObjectId, input: OrdinaryInquiry): Promise<Properties> {
+      return await this.likeService.getFavoriteProperties(memberId, input);
+    }
+    public async getVisited(memberId: ObjectId, input: OrdinaryInquiry): Promise<Properties> {
+      return await this.viewService.getVisitedProperties(memberId, input);
     }
 }

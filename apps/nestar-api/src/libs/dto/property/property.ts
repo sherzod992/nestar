@@ -3,6 +3,7 @@ import { ObjectId } from "mongoose";
 import { PropertyLocation, PropertyStatus, PropertyType } from "../../enums/property.enum";
 import { Member, TotalCounter } from "../member/member";
 import { MeLiked } from "../like/like";
+import { MeFollowed } from "../follow/follow";
 
 
 @ObjectType()
@@ -86,8 +87,8 @@ export class Property {
   @Field(() => [MeLiked], { nullable: true })
 	meLiked?: MeLiked[];
 
-	// @Field(() => [MeFollowed], { nullable: true })
-	// meFollowed?: MeFollowed[];
+	@Field(() => [MeFollowed], { nullable: true })
+	meFollowed?: MeFollowed[];
 }
   
 
