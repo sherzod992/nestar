@@ -8,6 +8,7 @@ import { AppResolver } from './app.resolver';
 import { ComponentsModule } from './components/components.module';
 import { DatabaseModule } from './database/database.module';
 import { T } from './libs/types/common';
+import { SocketModule } from './socket/socket.module';
 
 //decoretor 
 @Module({
@@ -30,7 +31,7 @@ import { T } from './libs/types/common';
       }
     }),
     ComponentsModule,//http
-    DatabaseModule, //tcp
+    DatabaseModule, SocketModule, //tcp
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver],//property
