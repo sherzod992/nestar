@@ -28,7 +28,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   handleDisconnect(client: WebSocket) {
     this.summaryClient--;
-    this.logger.log(`Client disconnected. Remaining clients: ${this.summaryClient}`);
+    this.logger.log(`Client disconnected. Remaining clients: ${this.summaryClient}==`);
   }
 
   @SubscribeMessage('message')
