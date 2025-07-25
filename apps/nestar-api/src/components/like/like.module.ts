@@ -11,7 +11,7 @@ import LikeSchema from "../../schemas/Like.model";
   // like resolver kerak bolmedi servicelar orqali ishlaymiz
   // har biri alohidadan  ozini ichiga tashkillashtramiz property, member,
   providers: [LikeService],
-  // like modelni tashqariga export qilamiz
+
   exports:[LikeService]
 })
 export class LikeModule {}
